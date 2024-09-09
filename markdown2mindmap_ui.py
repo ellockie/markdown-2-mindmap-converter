@@ -45,20 +45,25 @@ def main():
     main_window = tk.Tk()
     main_window.title("Markdown to Indent Converter")
 
-    topframe = tk.Frame(main_window, height=50)
-    topframe.pack(fill="x")
+    # Create a new frame to hold input and output vertically
+    vertical_frame = tk.Frame(main_window)
+    vertical_frame.pack(fill="both", expand=True)
 
-    # Create the input field
-    input_label = tk.Label(topframe, text="Input:", font=("Arial", 12))
+    # Create frames for input and output
+    inputframe = tk.Frame(vertical_frame)
+    inputframe.pack(fill="both", expand=True)
+    outputframe = tk.Frame(vertical_frame)
+    outputframe.pack(fill="both", expand=True)
+
+    # Create input field
+    input_label = tk.Label(inputframe, text="Input:", font=("Arial", 12))
     input_label.pack(side=tk.LEFT, padx=2)
     input_field = scrolledtext.ScrolledText(
-        topframe, width=INPUTDims[0], height=INPUTDims[1], wrap=tk.WORD
+        inputframe, width=INPUTDims[0], height=OUTPUTDims[1], wrap=tk.WORD
     )
     input_field.pack(side=tk.LEFT, fill="x", expand=True)
 
-    # Create the output frame
-    outputframe = tk.Frame(topframe, width=OUTPUTDims[0])
-    outputframe.pack(side=tk.LEFT)
+    # Create output field
     output_label = tk.Label(outputframe, text="Output:", font=("Arial", 12))
     output_label.pack(side=tk.LEFT, padx=2)
     output_field = scrolledtext.ScrolledText(
