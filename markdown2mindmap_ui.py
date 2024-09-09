@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import scrolledtext, messagebox
+from tkinter import scrolledtext, messagebox, ttk
 import threading
 import queue
 from pyperclip import copy
@@ -7,76 +7,87 @@ from pyperclip import copy
 from markdown_to_indent.markdown_to_indent import markdown_to_indent
 
 # Constants
-INPUT_WIDTH = 120
-INPUT_HEIGHT = 20
-OUTPUT_WIDTH = 120
-OUTPUT_HEIGHT = 30
+INPUTDims = (120, 20)
+OUTPUTDims = (120, 30)
 BUTTON_WIDTH = 20
-
-
-# Function to handle button click
-def convert_and_display():
-    input_text = input_field.get(1.0, tk.END)
-    output_text = markdown_to_indent(input_text)
-    output_field.config(state="normal")
-    output_field.delete(1.0, tk.END)
-    output_field.insert(tk.END, output_text)
-    output_field.config(state="disabled")
-
-
-def copy_to_clipboard():
-    try:
-        copy(output_field.get("1.0", tk.END))
-        messagebox.showinfo("Success", "Output copied to clipboard")
-    except Exception as e:
-        messagebox.showerror("Error", str(e))
 
 
 # Create the main window
 def main():
-    global input_field, output_field
-    root = tk.Tk()
-    root.title("Markdown to Indent Converter")
 
-    # Create the input field
-    input_label = tk.Label(root, text="Input:", font=("Arial", 12))
-    input_label.grid(row=0, column=0)
-    input_field = scrolledtext.ScrolledText(
-        root, width=INPUT_WIDTH, height=INPUT_HEIGHT, wrap=tk.WORD
-    )
-    input_field.grid(row=1, column=0, columnspan=3)
+    # Function to handle button click
+    def convert_and_display():
+        try:
+            input_text = input_field.get(1.0, tk.END)
+            output_text = markdown_to_indent(input_text)
+            output_field.config(state="normal")
+            output_field.delete(1.0, tk.END)
+            output_field.insert(tk.END, output_text)
+            output_field.config(state="disabled")
+        except Exception as e:
+            messagebox.showerror("Conversion Error", str(e))
 
-    # Create the output field
-    output_label = tk.Label(root, text="Output:", font=("Arial", 12))
-    output_label.grid(row=2, column=0)
-    output_field = scrolledtext.ScrolledText(
-        root, width=OUTPUT_WIDTH, height=OUTPUT_HEIGHT, wrap=tk.WORD
-    )
-    output_field.grid(row=3, column=0, columnspan=3)
-    output_field.config(state="disabled")
+    def copy_to_clipboard():
+        try:
+            copy(output_field.get("1.0", tk.END))
+            messagebox.showinfo("Success", "Output copied to clipboard")
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
 
-    # Create the conversion button
-    button = tk.Button(
-        root, text="Copy to Clipboard", width=BUTTON_WIDTH, command=copy_to_clipboard
-    )
-    button.grid(row=4, column=0, columnspan=3)
-
-    # Implement the delay functionality
-    input_queue = queue.Queue()
-
-    last_input = input_field.get(1.0, tk.END)
-
-    def check_input_and_convert():
+    def detections_and_convert():
         nonlocal last_input
         current_input = input_field.get(1.0, tk.END)
         if current_input != last_input:
             threading.Thread(target=convert_and_display).start()
             last_input = current_input
-        root.after(1000, check_input_and_convert)
+        main_window.after(1000, detections_and_convert)
 
-    root.after(1000, check_input_and_convert)
+    main_window = tk.Tk()
+    main_window.title("Markdown to Indent Converter")
 
-    root.mainloop()
+    topframe = tk.Frame(main_window, height=50)
+    topframe.pack(fill="x")
+
+    # Create the input field
+    input_label = tk.Label(topframe, text="Input:", font=("Arial", 12))
+    input_label.pack(side=tk.LEFT, padx=2)
+    input_field = scrolledtext.ScrolledText(
+        topframe, width=INPUTDims[0], height=INPUTDims[1], wrap=tk.WORD
+    )
+    input_field.pack(side=tk.LEFT, fill="x", expand=True)
+
+    # Create the output frame
+    outputframe = tk.Frame(topframe, width=OUTPUTDims[0])
+    outputframe.pack(side=tk.LEFT)
+    output_label = tk.Label(outputframe, text="Output:", font=("Arial", 12))
+    output_label.pack(side=tk.LEFT, padx=2)
+    output_field = scrolledtext.ScrolledText(
+        outputframe, width=OUTPUTDims[0], height=OUTPUTDims[1], wrap=tk.WORD
+    )
+    output_field.pack(side=tk.LEFT, fill="x", expand=True)
+    output_field.config(state="disabled")
+
+    # Create the button
+    buttonframe = tk.Frame(main_window)
+    buttonframe.pack(fill="x")
+    convert_button = tk.Button(
+        buttonframe, text="Convert Now", width=BUTTON_WIDTH, command=convert_and_display
+    )
+    convert_button.pack(side=tk.LEFT, padx=20)
+    paste_button = tk.Button(
+        buttonframe,
+        text="Copy to Clipboard",
+        width=BUTTON_WIDTH,
+        command=copy_to_clipboard,
+    )
+    paste_button.pack(side=tk.LEFT, padx=20)
+
+    # Implement the delay functionality
+    last_input = input_field.get(1.0, tk.END)
+
+    detections_and_convert()
+
+    main_window.mainloop()
 
 
 if __name__ == "__main__":
