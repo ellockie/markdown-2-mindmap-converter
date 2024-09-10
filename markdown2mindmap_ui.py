@@ -9,6 +9,8 @@ from markdown_to_indent.markdown_to_indent import markdown_to_indent
 INPUTDims = (120, 22)
 OUTPUTDims = (120, 22)
 BUTTON_WIDTH = 20
+BUTTON_HEIGHT = 3
+LABEL_WIDTH = 8
 
 
 # Create the main window
@@ -46,6 +48,9 @@ def main():
 
     # Create a new frame to hold input and output vertically
     vertical_frame = tk.Frame(main_window)
+    print("tk.Frame:")
+    print(vertical_frame.configure().keys())
+    print("================================================")
     vertical_frame.pack(fill="both", expand=True)
 
     # Create frames for input and output
@@ -55,7 +60,13 @@ def main():
     outputframe.pack(fill="both", expand=True)
 
     # Create input field
-    input_label = tk.Label(inputframe, text="Input:", font=("Arial", 12))
+    input_label = tk.Label(
+        inputframe, text="Input:", font=("Arial", 12), width=LABEL_WIDTH, anchor="e"
+    )
+    print("tk.Label (diff):")
+    print(set(input_label.configure().keys()) - set(vertical_frame.configure().keys()))
+    print(vertical_frame.configure().keys())
+    print("================================================")
     input_label.pack(side=tk.LEFT, padx=2)
     input_field = scrolledtext.ScrolledText(
         inputframe, width=INPUTDims[0], height=OUTPUTDims[1], wrap=tk.WORD
@@ -63,7 +74,9 @@ def main():
     input_field.pack(side=tk.LEFT, fill="x", expand=True)
 
     # Create output field
-    output_label = tk.Label(outputframe, text="Output:", font=("Arial", 12))
+    output_label = tk.Label(
+        outputframe, text="Output:", font=("Arial", 12), width=LABEL_WIDTH, anchor="e"
+    )
     output_label.pack(side=tk.LEFT, padx=2)
     output_field = scrolledtext.ScrolledText(
         outputframe, width=OUTPUTDims[0], height=OUTPUTDims[1], wrap=tk.WORD
@@ -78,9 +91,10 @@ def main():
         buttonframe,
         text="Copy to Clipboard",
         width=BUTTON_WIDTH,
+        height=BUTTON_HEIGHT,
         command=copy_to_clipboard,
     )
-    paste_button.pack(side=tk.RIGHT, padx=20)
+    paste_button.pack(side=tk.RIGHT, padx=20, pady=20)
 
     # Implement the delay functionality
     last_input = input_field.get(1.0, tk.END)
