@@ -1,14 +1,13 @@
 import tkinter as tk
-from tkinter import scrolledtext, messagebox, ttk
+from tkinter import scrolledtext, messagebox
 import threading
-import queue
 from pyperclip import copy
 
 from markdown_to_indent.markdown_to_indent import markdown_to_indent
 
 # Constants
-INPUTDims = (120, 20)
-OUTPUTDims = (120, 30)
+INPUTDims = (120, 22)
+OUTPUTDims = (120, 22)
 BUTTON_WIDTH = 20
 
 
@@ -75,17 +74,13 @@ def main():
     # Create the button
     buttonframe = tk.Frame(main_window)
     buttonframe.pack(fill="x")
-    convert_button = tk.Button(
-        buttonframe, text="Convert Now", width=BUTTON_WIDTH, command=convert_and_display
-    )
-    convert_button.pack(side=tk.LEFT, padx=20)
     paste_button = tk.Button(
         buttonframe,
         text="Copy to Clipboard",
         width=BUTTON_WIDTH,
         command=copy_to_clipboard,
     )
-    paste_button.pack(side=tk.LEFT, padx=20)
+    paste_button.pack(side=tk.RIGHT, padx=20)
 
     # Implement the delay functionality
     last_input = input_field.get(1.0, tk.END)
