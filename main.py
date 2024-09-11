@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import threading
 from pyperclip import copy
-from markdown_to_indent.markdown_to_indent import markdown_to_indent
+from src.markdown_to_indent import markdown_to_indent
 from src.ui_components import (
     create_main_window,
     get_input_field,
