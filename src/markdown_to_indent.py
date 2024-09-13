@@ -1,23 +1,20 @@
 import re
 
-
 def get_indent_level(line):
     header_match = re.match(r"^(#+)\s", line)
     if header_match:
         return len(header_match.group(1)) - 1
-    list_match = re.match(r"^(\s*[\-\+])\s", line)
+    list_match = re.match(r"^(\s*[-+])\s", line)
     if list_match:
-        return len(list_match.group(1)) // 2
+        spaces = len(list_match.group(1)) - 1  # Subtract 1 for the '-' or '+'
+        return spaces // 2
     return -1  # Return -1 for plain lines
 
-
 def convert_bold_markers(text):
-    return re.sub(r"^(.*?)\*\*(.*?)\*\*(.*)$", r"<html>\1<b>\2</b>\3</html>", text)
-
+    return re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", text)
 
 def is_reset_marker(line):
     return re.match(r"^\[.*\]$", line.strip()) is not None
-
 
 def process_line(current_indent, last_header_indent, last_plain_indent, line):
     line_indent = get_indent_level(line)
@@ -29,14 +26,27 @@ def process_line(current_indent, last_header_indent, last_plain_indent, line):
         last_header_indent = current_indent
     elif re.match(r"^\s*[-+]\s", line):  # List item
         current_indent = last_plain_indent + 1
+        last_plain_indent = current_indent
+    else:
+        # For nested list items
+        current_indent = last_plain_indent + (line_indent - last_plain_indent)
+        last_plain_indent = current_indent
+
     if re.match(r"^\s*[-+]\s", line):
         line_content = line.lstrip(" -+").strip()
     else:
         line_content = line.lstrip("#").strip()
-    formatted_line = convert_bold_markers(line_content)
-    indented_line = "  " * current_indent + formatted_line + "\n"
-    return indented_line
 
+    # Check if the line contains bold markers
+    if '**' in line_content:
+        formatted_line = convert_bold_markers(line_content)
+        # Wrap the formatted line with <html> tags
+        formatted_line = "<html>" + formatted_line + "</html>"
+    else:
+        formatted_line = line_content
+
+    indented_line = "  " * current_indent + formatted_line + "\n"
+    return indented_line, current_indent, last_header_indent, last_plain_indent
 
 def markdown_to_indent(text):
     current_indent = 0
@@ -53,7 +63,7 @@ def markdown_to_indent(text):
             last_plain_indent = 0
             continue
 
-        indented_line = process_line(
+        indented_line, current_indent, last_header_indent, last_plain_indent = process_line(
             current_indent, last_header_indent, last_plain_indent, line
         )
         output += indented_line
