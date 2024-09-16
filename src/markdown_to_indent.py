@@ -1,44 +1,52 @@
 import re
 
-def get_indent_level(line):
-    header_match = re.match(r"^(#+)\s", line)
+# Adjust this value based on how many spaces represent one indent level in your source
+SPACES_PER_INDENT = 2
+
+
+def get_leading_indent_level(line, spaces_per_indent=SPACES_PER_INDENT):
+    leading_spaces = len(line) - len(line.lstrip(" "))
+    indent_level = leading_spaces // spaces_per_indent
+    return indent_level
+
+
+def get_indent_level(line, last_header_indent):
+    leading_indent = get_leading_indent_level(line)
+    stripped_line = line.lstrip(" ")
+    header_match = re.match(r"^(#+)\s", stripped_line)
     if header_match:
-        return len(header_match.group(1)) - 1
-    list_match = re.match(r"^(\s*[-+])\s", line)
+        header_level = len(header_match.group(1)) - 1  # Base 0 for single '#'
+        return header_level + leading_indent
+    list_match = re.match(r"^([\-\+])\s", stripped_line)
     if list_match:
-        spaces = len(list_match.group(1)) - 1  # Subtract 1 for the '-' or '+'
-        return spaces // 2
-    return -1  # Return -1 for plain lines
+        # For list items, use last_header_indent plus leading indent
+        return last_header_indent + leading_indent + 1
+    # Plain lines inherit last header indent plus leading indent
+    return last_header_indent + leading_indent + 1
+
 
 def convert_bold_markers(text):
     return re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", text)
 
+
 def is_reset_marker(line):
     return re.match(r"^\[.*\]$", line.strip()) is not None
 
-def process_line(current_indent, last_header_indent, last_plain_indent, line):
-    line_indent = get_indent_level(line)
-    if line_indent == -1:  # Plain line
-        current_indent = last_header_indent + 1
-        last_plain_indent = current_indent
-    elif re.match(r"^#+\s", line):  # Header
-        current_indent = line_indent
-        last_header_indent = current_indent
-    elif re.match(r"^\s*[-+]\s", line):  # List item
-        current_indent = last_plain_indent + 1
-        last_plain_indent = current_indent
-    else:
-        # For nested list items
-        current_indent = last_plain_indent + (line_indent - last_plain_indent)
-        last_plain_indent = current_indent
 
-    if re.match(r"^\s*[-+]\s", line):
-        line_content = line.lstrip(" -+").strip()
-    else:
-        line_content = line.lstrip("#").strip()
+def process_line(last_header_indent, line):
+    stripped_line = line.lstrip(" ")
+    current_indent = get_indent_level(line, last_header_indent)
+
+    if re.match(r"^#+\s", stripped_line):  # Header
+        last_header_indent = current_indent
+        line_content = stripped_line.lstrip("#").strip()
+    elif re.match(r"^[-+]\s", stripped_line):  # List item
+        line_content = stripped_line.lstrip("-+").strip()
+    else:  # Plain line
+        line_content = stripped_line
 
     # Check if the line contains bold markers
-    if '**' in line_content:
+    if "**" in line_content:
         formatted_line = convert_bold_markers(line_content)
         # Wrap the formatted line with <html> tags
         formatted_line = "<html>" + formatted_line + "</html>"
@@ -46,26 +54,20 @@ def process_line(current_indent, last_header_indent, last_plain_indent, line):
         formatted_line = line_content
 
     indented_line = "  " * current_indent + formatted_line + "\n"
-    return indented_line, current_indent, last_header_indent, last_plain_indent
+    return indented_line, last_header_indent
+
 
 def markdown_to_indent(text):
-    current_indent = 0
     last_header_indent = 0
-    last_plain_indent = 0
-
     output = ""
 
     for line in text.split("\n"):
         if is_reset_marker(line):
             output += line.strip() + "\n"
-            current_indent = 0
             last_header_indent = 0
-            last_plain_indent = 0
             continue
 
-        indented_line, current_indent, last_header_indent, last_plain_indent = process_line(
-            current_indent, last_header_indent, last_plain_indent, line
-        )
+        indented_line, last_header_indent = process_line(last_header_indent, line)
         output += indented_line
 
     return output
