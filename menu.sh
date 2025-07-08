@@ -2,16 +2,16 @@
 # v. 0.4
 
 # Define color variables
-RED=$(tput setaf 1)    # for regular options
-GREEN=$(tput setaf 2)    # for regular options
-CYAN=$(tput setaf 6)     # for special options/notes
+RED=$(tput setaf 1)   # for regular options
+GREEN=$(tput setaf 2) # for regular options
+CYAN=$(tput setaf 6)  # for special options/notes
 DIM=$(tput dim)
 RESET=$(tput sgr0)
 
 # Copied from:  ~/Dropbox/____Scripts/___Bash/___Project_menu
 
 # Exit immediately if a command exits with a non-zero status.
-set -e
+# set -e
 
 # Error handling function
 error_exit() {
@@ -114,19 +114,19 @@ run_project() {
 
     # Execute script based on file extension
     case "${main_filename##*.}" in
-        "sh")
-            # Execute shell script
-            sh "$main_filename"
-            ;;
-        "py")
-            # Execute python script
-            python "$main_filename"
-            ;;
-        *)
-            echo "${RED}Error: Unsupported file type. Only .sh and .py files are supported.${RESET}"
-            deactivate
-            return 1
-            ;;
+    "sh")
+        # Execute shell script
+        sh "$main_filename"
+        ;;
+    "py")
+        # Execute python script
+        python "$main_filename"
+        ;;
+    *)
+        echo "${RED}Error: Unsupported file type. Only .sh and .py files are supported.${RESET}"
+        deactivate
+        return 1
+        ;;
     esac
 
     deactivate
@@ -149,23 +149,23 @@ usage() {
 # Execute selected option
 execute_option() {
     case "$1" in
-        1)
-            run_project
-            ;;
-        2)
-            setup_project
-            ;;
-        3)
-            activate_project
-            ;;
-        4)
-            printf "\n%sGoodbye!%s\n\n" "${GREEN}" "${RESET}"
-            exit 0
-            ;;
-        *)
-            printf "\n${RED}Invalid choice. Exiting.${RESET}\n\n"
-            exit 1
-            ;;
+    1)
+        run_project
+        ;;
+    2)
+        setup_project
+        ;;
+    3)
+        activate_project
+        ;;
+    4)
+        printf "\n%sGoodbye!%s\n\n" "${GREEN}" "${RESET}"
+        exit 0
+        ;;
+    *)
+        printf "\n${RED}Invalid choice. Exiting.${RESET}\n\n"
+        exit 1
+        ;;
     esac
 }
 
@@ -194,8 +194,7 @@ else
     echo "  ${RED}4. ${GREEN}Exit${RESET}"
 
     printf "\nEnter choice [1-4]:  "
-    read choice < /dev/tty
+    read choice </dev/tty
 
     execute_option "$choice"
 fi
-
