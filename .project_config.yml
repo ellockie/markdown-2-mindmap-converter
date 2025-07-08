@@ -1,0 +1,8 @@
+project:
+  name: "md2mm"
+  python_version: "3.12.6"
+  main_filename: "main-ui.py"
+  environments_available:
+    mac: true
+    win: true, run directly (no virtual env)
+    wsl: false (GUI not visible)
