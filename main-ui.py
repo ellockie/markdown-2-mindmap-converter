@@ -63,13 +63,17 @@ class CTkSuccessDialog(ctk.CTkToplevel):
 # Function to handle conversion
 def convert_and_display():
     try:
-        input_text = get_input_field().get("1.0", "end-1c")  # Use "end-1c" instead of ctk.END
+        input_text = get_input_field().get(
+            "1.0", "end-1c"
+        )  # Use "end-1c" instead of ctk.END
         output_text = markdown_to_indent(input_text)
         output_field = get_output_field()
 
         output_field.configure(state="normal")
         output_field.delete("1.0", "end")  # Use "end" instead of ctk.END
-        output_field.insert("1.0", output_text)  # Use "1.0" instead of ctk.END for insert
+        output_field.insert(
+            "1.0", output_text
+        )  # Use "1.0" instead of ctk.END for insert
         output_field.configure(state="disabled")
     except Exception as e:
         # Show error using CustomTkinter dialog
@@ -80,7 +84,9 @@ def convert_and_display():
 def copy_to_clipboard():
     try:
         output_field = get_output_field()
-        text_to_copy = output_field.get("1.0", "end-1c")  # Use "end-1c" to avoid extra newline
+        text_to_copy = output_field.get(
+            "1.0", "end-1c"
+        )  # Use "end-1c" to avoid extra newline
         copy(text_to_copy)
         # Show success using CustomTkinter dialog
         CTkSuccessDialog("Success", "Copied to clipboard!")
@@ -109,7 +115,9 @@ def main():
 
     # Set appearance mode and color theme for customtkinter
     ctk.set_appearance_mode("System")  # Modes: "System" (default), "Dark", "Light"
-    ctk.set_default_color_theme("blue")  # Themes: "blue" (default), "green", "dark-blue"
+    ctk.set_default_color_theme(
+        "blue"
+    )  # Themes: "blue" (default), "green", "dark-blue"
 
     try:
         # Initialize the window and UI components
@@ -130,6 +138,7 @@ def main():
     except Exception as e:
         print(f"Error during initialization: {e}")
         import traceback
+
         traceback.print_exc()
 
 
