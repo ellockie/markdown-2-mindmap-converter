@@ -41,7 +41,7 @@ def process_line(current_indent, last_header_indent, last_plain_indent, line):
     indented_line = "  " * current_indent + formatted_line + "\n"
     return indented_line, current_indent, last_header_indent, last_plain_indent
 
-def markdown_to_indent(text):
+def markdown_to_mindmap(text):
     current_indent = 0
     last_header_indent = 0
     last_plain_indent = 0

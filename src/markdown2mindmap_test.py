@@ -1,6 +1,6 @@
 import pytest
 
-from src.markdown_to_indent import markdown_to_indent
+from src.markdown_to_mindmap import markdown_to_mindmap
 
 
 @pytest.mark.parametrize(
@@ -106,7 +106,7 @@ Text under header
         ),
     ],
 )
-def test_convert_markdown_to_indent(tmpdir, input_content, expected_output_content):
+def test_convert_markdown_to_mindmap(tmpdir, input_content, expected_output_content):
     # Create a temporary input file
     input_file = tmpdir.join("input_markdown.md")
     input_file.write(input_content)
@@ -115,7 +115,7 @@ def test_convert_markdown_to_indent(tmpdir, input_content, expected_output_conte
     output_file = tmpdir.join("output_indent.txt")
 
     # Run the function
-    markdown_to_indent(input_file, output_file)
+    markdown_to_mindmap(input_file, output_file)
 
     # Read and verify the output
     with open(output_file, "r", encoding="utf-8") as f:

@@ -1,5 +1,5 @@
-from src.markdown_to_indent import (
-    markdown_to_indent,
+from src.markdown_to_mindmap import (
+    markdown_to_mindmap,
 )
 
 input_file = "_input_markdown.md"
@@ -16,11 +16,11 @@ def write_string_to_file(filename, content):
         file.write(content)
 
 
-def convert_markdown_to_indent(input_file, output_file):
+def convert_markdown_to_mindmap(input_file, output_file):
     text = read_file_to_string(input_file)
-    indented_text = markdown_to_indent(text)  # Reusing the existing function
+    indented_text = markdown_to_mindmap(text)  # Reusing the existing function
     write_string_to_file(output_file, indented_text)
 
 
 if __name__ == "__main__":
-    convert_markdown_to_indent(input_file, output_file)
+    convert_markdown_to_mindmap(input_file, output_file)

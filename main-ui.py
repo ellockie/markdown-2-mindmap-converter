@@ -1,7 +1,7 @@
 import customtkinter as ctk
 import threading
 from pyperclip import copy
-from src.markdown_to_indent import markdown_to_indent
+from src.markdown_to_mindmap import markdown_to_mindmap
 from src.ui_components import (
     create_main_window,
     get_input_field,
@@ -66,7 +66,7 @@ def convert_and_display():
         input_text = get_input_field().get(
             "1.0", "end-1c"
         )  # Use "end-1c" instead of ctk.END
-        output_text = markdown_to_indent(input_text)
+        output_text = markdown_to_mindmap(input_text)
         output_field = get_output_field()
 
         output_field.configure(state="normal")

@@ -57,7 +57,7 @@ def process_line(last_header_indent, line):
     return indented_line, last_header_indent
 
 
-def markdown_to_indent(text):
+def markdown_to_mindmap(text):
     last_header_indent = 0
     output = ""
 
