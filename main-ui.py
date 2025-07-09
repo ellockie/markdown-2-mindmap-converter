@@ -1,7 +1,7 @@
 import customtkinter as ctk
 import threading
 from pyperclip import copy
-from src.markdown_to_mindmap import markdown_to_mindmap
+from src.markdown_to_mindmap_md2 import markdown_to_mindmap
 from src.ui_components import (
     create_main_window,
     get_input_field,

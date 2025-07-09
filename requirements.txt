@@ -1,2 +1,3 @@
-pyperclip
 customtkinter
+markdown2
+pyperclip
