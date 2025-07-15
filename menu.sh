@@ -1,17 +1,17 @@
 #!/bin/sh
-# v. 0.4
+# v. 0.5
+
+# Exit immediately if a command exits with a non-zero status.
+set -e
 
 # Define color variables
-RED=$(tput setaf 1)   # for regular options
-GREEN=$(tput setaf 2) # for regular options
-CYAN=$(tput setaf 6)  # for special options/notes
+RED=$(tput setaf 1)    # for regular options
+GREEN=$(tput setaf 2)    # for regular options
+CYAN=$(tput setaf 6)     # for special options/notes
 DIM=$(tput dim)
 RESET=$(tput sgr0)
 
 # Copied from:  ~/Dropbox/____Scripts/___Bash/___Project_menu
-
-# Exit immediately if a command exits with a non-zero status.
-# set -e
 
 # Error handling function
 error_exit() {
@@ -21,6 +21,7 @@ error_exit() {
 
 # Validate environment and configuration
 validate_environment() {
+    echo "Validating environment and configuration..."
     # Check environment variable
     [ -z "$VIRTUAL_ENV_DIR" ] && error_exit "VIRTUAL_ENV_DIR environment variable is not set."
 
@@ -37,6 +38,12 @@ validate_environment() {
     [ -z "$python_version" ] && error_exit "project.python_version is not set"
     [ -z "$main_filename" ] && error_exit "project.main_filename is not set"
 
+    echo " "
+    echo " (*)      Project name:  $project_name"
+    echo " (*)    Python version:  $python_version"
+    echo " (*)     Main filename:  $main_filename"
+    echo " "
+
     # Type/format validation
     echo "$python_version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$' ||
         error_exit "Invalid Python version format: $python_version. Expected format: X.Y.Z (e.g., 3.9.0)"
@@ -47,37 +54,53 @@ validate_environment() {
     # Check if the expected Python version is installed
     pyenv versions | grep -q "$python_version" ||
         error_exit "Python '$python_version' is not installed. Please install it using pyenv."
+    echo "Environment and configuration validated successfully."
 }
 
 # Setup project virtual environment
 setup_project() {
     validate_environment
-    # This assumes the script is being run from the root directory of the project.
+
+    # 1) Ensure pyenv is initialized in THIS shell (so we can use pyenv in the script)
+    if command -v pyenv >/dev/null 2>&1; then
+        eval "$(pyenv init -)"
+    else
+        echo "pyenv not found; please install or ensure it is on PATH"
+        return 1
+    fi
+
+    # Root directory of the project & venv settings
     venv_dir="$VIRTUAL_ENV_DIR/$project_name"
     activate_path="$venv_dir/bin/activate"
 
-    echo "activate_path: $activate_path"
+    echo " [] Current Python version: $(python --version)"
+    echo " [] Setting local Python version to $python_version..."
 
-    # Set local Python version
+    # 2) Set local Python version with pyenv
     pyenv local "$python_version"
+
+    # 3) Re-initialize pyenv in THIS script session to pick up the newly written .python-version
+    eval "$(pyenv init -)"
+    echo " [] Python version set to: $(python --version)"  # Should now show the new version
 
     # Create virtual environment if it doesn't exist
     if [ ! -d "$venv_dir" ]; then
-        python3 -m venv "$venv_dir"
+        python -m venv "$venv_dir"
         echo "Virtual environment created: $venv_dir"
     else
-        echo "Virtual environment '$venv_dir' already exists."
+        echo "Virtual environment, '$venv_dir', already exists."
     fi
 
     # Activate, install dependencies, then deactivate
     echo "Activating the venv..."
-    # source "$activate_path"
     . "$activate_path" # more portable
     pip install --upgrade pip
     pip install -r requirements.txt
     deactivate
+
     echo "Project setup / updated successfully."
 }
+
 
 # Activate project virtual environment
 activate_project() {
@@ -97,7 +120,6 @@ activate_project() {
     venv_dir="$VIRTUAL_ENV_DIR/$project_name"
     activate_path="$venv_dir/bin/activate"
 
-    # source "$activate_path"
     . "$activate_path" # more portable
     echo "Virtual environment activated: $venv_dir"
 }
@@ -109,24 +131,23 @@ run_project() {
     venv_dir="$VIRTUAL_ENV_DIR/$project_name"
     activate_path="$venv_dir/bin/activate"
 
-    # source "$activate_path"
     . "$activate_path" # more portable
 
     # Execute script based on file extension
     case "${main_filename##*.}" in
-    "sh")
-        # Execute shell script
-        sh "$main_filename"
-        ;;
-    "py")
-        # Execute python script
-        python "$main_filename"
-        ;;
-    *)
-        echo "${RED}Error: Unsupported file type. Only .sh and .py files are supported.${RESET}"
-        deactivate
-        return 1
-        ;;
+        "sh")
+            # Execute shell script
+            sh "$main_filename"
+            ;;
+        "py")
+            # Execute python script
+            python "$main_filename"
+            ;;
+        *)
+            echo "${RED}Error: Unsupported file type. Only .sh and .py files are supported.${RESET}"
+            deactivate
+            return 1
+            ;;
     esac
 
     deactivate
@@ -149,23 +170,23 @@ usage() {
 # Execute selected option
 execute_option() {
     case "$1" in
-    1)
-        run_project
-        ;;
-    2)
-        setup_project
-        ;;
-    3)
-        activate_project
-        ;;
-    4)
-        printf "\n%sGoodbye!%s\n\n" "${GREEN}" "${RESET}"
-        exit 0
-        ;;
-    *)
-        printf "\n${RED}Invalid choice. Exiting.${RESET}\n\n"
-        exit 1
-        ;;
+        1)
+            run_project
+            ;;
+        2)
+            setup_project
+            ;;
+        3)
+            activate_project
+            ;;
+        4)
+            printf "\n%sGoodbye!%s\n\n" "${GREEN}" "${RESET}"
+            exit 0
+            ;;
+        *)
+            printf "\n${RED}Invalid choice. Exiting.${RESET}\n\n"
+            exit 1
+            ;;
     esac
 }
 
@@ -194,7 +215,7 @@ else
     echo "  ${RED}4. ${GREEN}Exit${RESET}"
 
     printf "\nEnter choice [1-4]:  "
-    read choice </dev/tty
+    read choice < /dev/tty
 
     execute_option "$choice"
 fi
