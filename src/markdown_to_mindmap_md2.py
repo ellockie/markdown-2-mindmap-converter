@@ -28,7 +28,9 @@ def get_indent_level(line, last_header_indent):
 
 
 def convert_markdown_formatting(text):
-    # Use markdown2 to convert markdown to HTML, then strip <p> tags for inline use
+    # Avoid converting numbered lines to HTML lists
+    if re.match(r"^\d+\.\s", text):
+        return text.strip()
     html = markdown2.markdown(text)
     # Remove wrapping <p>...</p> if present
     if html.startswith('<p>') and html.endswith('</p>\n'):
